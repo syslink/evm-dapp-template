@@ -1,15 +1,18 @@
 'use client'
 
+import { useEffect, useState } from 'react';
 import { ChakraProvider, extendTheme } from '@chakra-ui/react'
 import { WagmiConfig } from 'wagmi'
 import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit'
 import { WagmiProvider, configureChains } from 'wagmi';
 import { config } from "./wagmiConfig";
 import Header from './components/header/header'
+import Header_mobile from './components/header/mobile/header'
 import '@rainbow-me/rainbowkit/styles.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import '../styles/globals.css'
+import './globals.css'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Box } from '@chakra-ui/react'
 
 const theme = extendTheme({
   styles: {
@@ -47,6 +50,22 @@ const theme = extendTheme({
 
 const queryClient = new QueryClient()
 export default function RootLayout({ children }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 800);
+    };
+
+    // Initial check
+    checkMobile();
+
+    // Add resize listener
+    window.addEventListener('resize', checkMobile);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   return (
     <html lang="en">
       <head>
@@ -63,8 +82,12 @@ export default function RootLayout({ children }) {
                     })}>
                     <ChakraProvider theme={theme}>
                         <div className="tech-background"></div>
-                        <Header />
-                        {children}
+                        {
+                          isMobile ? <Header_mobile /> : <Header />
+                        }
+                        <Box pt="80px">
+                            {children}
+                        </Box>
                     </ChakraProvider>
                 </RainbowKitProvider>
             </QueryClientProvider>
